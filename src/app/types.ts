@@ -9,10 +9,9 @@
  */
 export type RoutePath =
     | "/"
-    | "/next"
 
 export function isRoutePath(path: string): path is RoutePath {
-    return ["/","/next"].includes(path)
+    return ["/"].includes(path)
 }
 
 export interface RouteMatch {

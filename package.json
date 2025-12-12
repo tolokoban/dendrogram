@@ -1,5 +1,5 @@
 {
-    "name": "...",
+    "name": "dendrogram",
     "description": "...",
     "version": "0.1.0",
     "private": true,
@@ -9,10 +9,10 @@
     "homepage": "https://tolokoban.github.io/...",
     "dependencies": {
         "@tolokoban/type-guards": "^0.9.0",
-        "@tolokoban/react-state": "^0.6.0",
-        "@tolokoban/ui": "^0.24.2",
-        "react": "^19.2.0",
-        "react-dom": "^19.2.0"
+        "@tolokoban/react-state": "^0.7.1",
+        "@tolokoban/ui": "^0.25.2",
+        "react": "^19.2.3",
+        "react-dom": "^19.2.3"
     },
     "scripts": {
         "clean": "rm -rf src/generated",

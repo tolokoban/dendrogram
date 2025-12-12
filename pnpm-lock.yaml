@@ -9,20 +9,20 @@ importers:
   .:
     dependencies:
       '@tolokoban/react-state':
-        specifier: ^0.6.0
-        version: 0.6.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        specifier: ^0.7.1
+        version: 0.7.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@tolokoban/type-guards':
         specifier: ^0.9.0
         version: 0.9.0
       '@tolokoban/ui':
-        specifier: ^0.24.2
-        version: 0.24.2(react@19.2.0)
+        specifier: ^0.25.2
+        version: 0.25.2(react@19.2.3)
       react:
-        specifier: ^19.2.0
-        version: 19.2.0
+        specifier: ^19.2.3
+        version: 19.2.3
       react-dom:
-        specifier: ^19.2.0
-        version: 19.2.0(react@19.2.0)
+        specifier: ^19.2.3
+        version: 19.2.3(react@19.2.3)
     devDependencies:
       '@babel/preset-typescript':
         specifier: ^7.26.0
@@ -122,7 +122,7 @@ importers:
         version: 0.5.7
       markdown-to-jsx:
         specifier: ^7.7.1
-        version: 7.7.17(react@19.2.0)
+        version: 7.7.17(react@19.2.3)
       mini-css-extract-plugin:
         specifier: ^2.9.2
         version: 2.9.4(webpack@5.102.1)
@@ -1424,19 +1424,19 @@ packages:
   '@surma/rollup-plugin-off-main-thread@2.2.3':
     resolution: {integrity: sha512-lR8q/9W7hZpMWweNiAKU7NQerBnzQQLvi8qnTDU/fxItPhtZVMbPV3lbCwjhIlNBe9Bbr5V+KHshvWmVSG9cxQ==}
 
-  '@tolokoban/react-state@0.6.0':
-    resolution: {integrity: sha512-17erPuqlN8qGllV96x+HMlWuqZLix/BL+RWdOUTPl5caGP666Fd/tkYtgHh6v0Ths2aWdetaBE19vy7tcXX5fg==}
+  '@tolokoban/react-state@0.7.1':
+    resolution: {integrity: sha512-Vpssq6BiXzI3X7zoZRv3y9D/juyrANphTxP0QShy/7e+ml8A8WETn8f+A95zV83DlT+MhE6s9EhHkJ6/KUUuEg==}
     peerDependencies:
-      react: ^19.2.0
-      react-dom: 19.2.0
+      react: ^19.2.1
+      react-dom: 19.2.1
 
   '@tolokoban/type-guards@0.9.0':
     resolution: {integrity: sha512-MLOlLsGBrvol1yR25K/kai7/DoZtVYHmedRxKmjS8We7vwwas/9wyVvijAg0bcAucOSNOyWtviNikLkmvri9lQ==}
 
-  '@tolokoban/ui@0.24.2':
-    resolution: {integrity: sha512-o0d2kPb/+Zu49eiplVq8CHX6sBd9FPlwBsrX7Lf5dgyvLaixETHewBbXKzsnDuHhviO/Tg9QYz/SMmUf7iB8uQ==}
+  '@tolokoban/ui@0.25.2':
+    resolution: {integrity: sha512-zqswlwDDw26QrTqPWv8n7EfEgeoh54MPXezFBBPkKAnrg7CQMbhPQktzP+D9g1gt1VJWs9WYhcaGlK04ijfWDQ==}
     peerDependencies:
-      react: ^18.3.1
+      react: ^19.2.0
 
   '@tsconfig/node10@1.0.12':
     resolution: {integrity: sha512-UCYBaeFvM11aU2y3YPZ//O5Rhj+xKyzy7mvcIoAjASbigy8mHMryP5cK7dgjlz2hWxh1g5pLw084E0a/wlUSFQ==}
@@ -4377,10 +4377,10 @@ packages:
     resolution: {integrity: sha512-8zGqypfENjCIqGhgXToC8aB2r7YrBX+AQAfIPs/Mlk+BtPTztOvTS01NRW/3Eh60J+a48lt8qsCzirQ6loCVfA==}
     engines: {node: '>= 0.8'}
 
-  react-dom@19.2.0:
-    resolution: {integrity: sha512-UlbRu4cAiGaIewkPyiRGJk0imDN2T3JjieT6spoL2UeSf5od4n5LB/mQ4ejmxhCFT1tYe8IvaFulzynWovsEFQ==}
+  react-dom@19.2.3:
+    resolution: {integrity: sha512-yELu4WmLPw5Mr/lmeEpox5rw3RETacE++JgHqQzd2dg+YbJuat3jH4ingc+WPZhxaoFzdv9y33G+F7Nl5O0GBg==}
     peerDependencies:
-      react: ^19.2.0
+      react: ^19.2.3
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -4388,8 +4388,8 @@ packages:
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
-  react@19.2.0:
-    resolution: {integrity: sha512-tmbWg6W31tQLeB5cdIBOicJDJRR2KzXsV7uSK9iNfLWQ5bIZfxuPEHp7M8wiHyHnn0DD1i7w3Zmin0FtkrwoCQ==}
+  react@19.2.3:
+    resolution: {integrity: sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==}
     engines: {node: '>=0.10.0'}
 
   read-pkg-up@7.0.1:
@@ -6924,17 +6924,17 @@ snapshots:
       magic-string: 0.25.9
       string.prototype.matchall: 4.0.12
 
-  '@tolokoban/react-state@0.6.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+  '@tolokoban/react-state@0.7.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
-      react: 19.2.0
-      react-dom: 19.2.0(react@19.2.0)
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
 
   '@tolokoban/type-guards@0.9.0': {}
 
-  '@tolokoban/ui@0.24.2(react@19.2.0)':
+  '@tolokoban/ui@0.25.2(react@19.2.3)':
     dependencies:
       json5: 2.2.3
-      react: 19.2.0
+      react: 19.2.3
       tslib: 2.8.1
 
   '@tsconfig/node10@1.0.12': {}
@@ -9873,9 +9873,9 @@ snapshots:
 
   markdown-extensions@2.0.0: {}
 
-  markdown-to-jsx@7.7.17(react@19.2.0):
+  markdown-to-jsx@7.7.17(react@19.2.3):
     optionalDependencies:
-      react: 19.2.0
+      react: 19.2.3
 
   math-intrinsics@1.1.0: {}
 
@@ -10594,16 +10594,16 @@ snapshots:
       iconv-lite: 0.4.24
       unpipe: 1.0.0
 
-  react-dom@19.2.0(react@19.2.0):
+  react-dom@19.2.3(react@19.2.3):
     dependencies:
-      react: 19.2.0
+      react: 19.2.3
       scheduler: 0.27.0
 
   react-is@16.13.1: {}
 
   react-is@18.3.1: {}
 
-  react@19.2.0: {}
+  react@19.2.3: {}
 
   read-pkg-up@7.0.1:
     dependencies:
