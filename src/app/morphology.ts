@@ -28,18 +28,61 @@ function makeMorphology(): Morphology {
                     I({
                         name: "dend.1",
                         children: [
-                            I({ name: "dend.1.1" }),
-                            I({ name: "dend.1.2" }),
+                            I({
+                                name: "myel.1.1",
+                                children: [
+                                    I({ name: "axon" }),
+                                    I({ name: "axon" }),
+                                ],
+                            }),
+                            I({
+                                name: "myel.1.2",
+                                children: [
+                                    I({ name: "axon" }),
+                                    I({
+                                        name: "axon",
+                                        children: [
+                                            I({ name: "axon" }),
+                                            I({ name: "axon" }),
+                                        ],
+                                    }),
+                                    I({ name: "axon" }),
+                                ],
+                            }),
                         ],
                     }),
+                    I({ name: "dend.1a" }),
+                    I({ name: "dend.1b" }),
                     I({
                         name: "dend.2",
                         children: [
-                            I({ name: "dend.2.1" }),
-                            I({ name: "dend.2.2" }),
+                            I({
+                                name: "dend.2.1",
+                            }),
+                            I({
+                                name: "dend.2.2",
+                                children: [
+                                    I({
+                                        name: "myel.1.2",
+                                        children: [
+                                            I({ name: "axon" }),
+                                            I({
+                                                name: "axon",
+                                                children: [
+                                                    I({ name: "axon" }),
+                                                    I({ name: "axon" }),
+                                                ],
+                                            }),
+                                            I({ name: "axon" }),
+                                        ],
+                                    }),
+                                ],
+                            }),
                             I({ name: "dend.2.3" }),
+                            I({ name: "dend.2.4" }),
                         ],
                     }),
+                    I({ name: "dend.1c" }),
                 ],
             }),
         ],
