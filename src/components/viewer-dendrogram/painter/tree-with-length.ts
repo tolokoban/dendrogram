@@ -5,7 +5,7 @@ import {
 } from "@/services/bluenaas-single-cell/types"
 import { Tree, TreeItem } from "./types"
 
-export function createTreeStructure(morphology: Morphology, isoLength: boolean): Tree {
+export function createTreeStructureWithLength(morphology: Morphology): Tree {
     const children: TreeItem[] = []
     const items = new Map<string, TreeItem[]>()
     for (const sectionName of Object.keys(morphology)) {
@@ -18,7 +18,6 @@ export function createTreeStructure(morphology: Morphology, isoLength: boolean):
             weight: 0,
             x: 0,
             y: 0,
-            length: computeSectionLength(section),
             children: [],
         }
         items.set(keyItem, item.children)
@@ -27,13 +26,11 @@ export function createTreeStructure(morphology: Morphology, isoLength: boolean):
     }
     if (children.length === 0) return { children, levelsCount: 0, grid: [] }
 
-    let childrenWithLength = children
-    if (isoLength) setSameLengthForEveryChild(childrenWithLength)
-    computeWeights(childrenWithLength)
-    const levelsCount = countLevels(childrenWithLength)
+    computeWeights(children)
+    const levelsCount = countLevels(children)
     const levelHeight = 1 / levelsCount
-    computeCoords(childrenWithLength, levelHeight)
-    return { children: childrenWithLength, levelsCount, grid: createGrid(childrenWithLength) }
+    computeCoords(children, levelHeight)
+    return { children, levelsCount, grid: createGrid(children) }
 }
 
 function computeWeights(children: TreeItem[]): number {
@@ -94,30 +91,3 @@ function recursivelyCreateGrid(
         recursivelyCreateGrid(grid, item.children, level + 1)
     }
 }
-
-/**
- * If we don't care about neurintes length, but only on the branching,
- * then we can assume that all neurites have a length of 1.
- */
-function setSameLengthForEveryChild(children: TreeItem[]) {
-    const fringe = children.slice()
-    while (fringe.length>0){
-        const item = fringe.pop()
-        if (!item) continue
-
-        item.length = 1
-        fringe.push(...item.children)
-    }
-    return children
-}
-
-function computeSectionLength(section: NeuronSectionInfo): number {
-    let length = 0
-    for (let i=0;i<section.nseg; i++) {
-        const x = section.xend[i]-section.xstart[i]
-        const y = section.yend[i]-section.ystart[i]
-        length=+Math.sqrt(x*x+y*y)
-    }
-    return length
-}
-

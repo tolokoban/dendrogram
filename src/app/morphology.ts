@@ -88,24 +88,26 @@ function makeMorphology(): Morphology {
         ],
         morphology
     )
+    console.log('🐞 [morphology@91] morphology =', morphology) // @FIXME: Remove this line written on 2026-01-08 at 14:48
     return morphology
 }
 
 function convertTreeToMorphology(
     tree: TreeItem[],
     morphology: Morphology,
-    level = 0
 ) {
     setTreeCoords(tree)
+    console.log('🐞 [morphology@101] tree =', tree) // @FIXME: Remove this line written on 2026-01-08 at 14:54
     generateMorphology(morphology, tree)
     return morphology
 }
 
-function setTreeCoords(tree: TreeItem[], rank = 0, level = 0): number {
+function setTreeCoords(tree: TreeItem[], rank = 0, y = 0): number {
     for (const item of tree) {
-        rank += setTreeCoords(item.children, level + 1)
+        const childY = y + 1 + Math.random()*Math.random()*10
+        rank += setTreeCoords(item.children, rank, childY)
         item.x = rank++
-        item.y = level
+        item.y = y
     }
     return rank
 }

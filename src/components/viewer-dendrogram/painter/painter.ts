@@ -228,7 +228,8 @@ class PainterDendrogram {
         const { context } = this
         if (!context) return
 
-        const tree = createTreeStructure(this.morphology)
+        const tree = createTreeStructure(this.morphology, false)
+        console.log('🐞 [painter@232] tree =', tree) // @FIXME: Remove this line written on 2026-01-08 at 15:01
         this.grid = tree.grid
         const segments: Record<string, Segment[]> = {}
         feedSegments(segments, tree.children, tree.levelsCount)
