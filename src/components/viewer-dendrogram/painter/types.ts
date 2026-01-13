@@ -1,4 +1,4 @@
-import { NeuronSectionInfo } from "@/services/bluenaas-single-cell/types"
+import type { NeuronSectionInfo } from "@/services/bluenaas-single-cell/types"
 
 export interface Tree {
     children: TreeItem[]
@@ -14,7 +14,7 @@ export interface TreeItem {
     x: number
     y: number
     length: number
+    radius: number
     weight: number
     children: TreeItem[]
 }
-

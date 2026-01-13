@@ -9,4 +9,5 @@ export interface NeuronSectionInfo {
     xend: number[]
     yend: number[]
     zend: number[]
+    diam: number[]
 }

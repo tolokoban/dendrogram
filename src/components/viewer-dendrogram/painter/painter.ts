@@ -1,10 +1,11 @@
 /* eslint-disable no-param-reassign */
+
+import { GenericEvent } from "@tolokoban/ui"
 import React from "react"
 
-import { createTreeStructure, TreeItem } from "./tree"
-
-import { Morphology } from "@/services/bluenaas-single-cell/types"
-import { GenericEvent } from "@tolokoban/ui"
+import type { Morphology } from "@/services/bluenaas-single-cell/types"
+import { createTreeStructure } from "./tree"
+import type { TreeItem } from "./types"
 
 const MARGIN = 8
 
@@ -15,6 +16,10 @@ interface Segment {
     y1: number
     item?: TreeItem
     color: string
+    /**
+     * Value between 0.0 (the thinnest) and 1.0 (the tickest).
+     */
+    radius: number
     // This segment has no child
     leave: boolean
 }
@@ -110,12 +115,13 @@ class PainterDendrogram {
         for (const color of Object.keys(this.segments)) {
             const segments = this.segments[color]
             context.strokeStyle = color
-            context.beginPath()
-            for (const { x0, y0, x1, y1 } of segments) {
+            for (const { x0, y0, x1, y1, radius } of segments) {
+                context.lineWidth = computeLineWidth(radius)
+                context.beginPath()
                 context.moveTo(fx(x0), fy(y0))
                 context.lineTo(fx(x1), fy(y1))
+                context.stroke()
             }
-            context.stroke()
             const { hoveredSegment } = this
             if (hoveredSegment) {
                 context.save()
@@ -229,7 +235,6 @@ class PainterDendrogram {
         if (!context) return
 
         const tree = createTreeStructure(this.morphology, false)
-        console.log('🐞 [painter@232] tree =', tree) // @FIXME: Remove this line written on 2026-01-08 at 15:01
         this.grid = tree.grid
         const segments: Record<string, Segment[]> = {}
         feedSegments(segments, tree.children, tree.levelsCount)
@@ -318,7 +323,6 @@ class PainterDendrogram {
             }
             const angle = keepPositive(Math.atan2(yy, xx))
             const radius = Math.sqrt(xx * xx + yy * yy)
-            console.log("Angle:", Math.round((180 * angle) / Math.PI))
             return [angle / (2 * Math.PI), radius]
         }
     }
@@ -379,6 +383,7 @@ function feedSegments(
             leave: item.children.length === 0,
             item,
             color,
+            radius: item.radius,
         })
     }
     if (children.length > 1) {
@@ -397,6 +402,7 @@ function feedSegments(
             y1: y,
             leave: false,
             color,
+            radius: 0,
         })
     }
 }
@@ -419,7 +425,6 @@ function resolveColor(name: string): string {
         case "hori":
             return "#7f75"
         default:
-            console.log("🐞 [painter@196] name =", name) // @FIXME: Remove this line written on 2025-12-15 at 09:53
             return "#fff"
     }
 }
@@ -434,4 +439,12 @@ function getSegmentsOfColor(
     const newItem: Segment[] = []
     segments[color] = newItem
     return newItem
+}
+
+function computeLineWidth(radius: number): number {
+    const min = 1
+    const max = 6
+    const lineWidth = min + radius * (max - min)
+    console.log("🐞 [painter@448] radius, lineWidth =", radius, lineWidth) // @FIXME: Remove this line written on 2026-01-13 at 12:59
+    return lineWidth
 }
