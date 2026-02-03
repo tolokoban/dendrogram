@@ -1,7 +1,6 @@
 import { type ArrayNumber3, TgdVec3 } from "@tolokoban/tgd"
 
-import type { Morphology } from "@/services/bluenaas-single-cell/types"
-import { logWarn } from "@/utils/logger"
+import type { Morphology } from "../types"
 
 export enum StructureItemType {
     Soma = 0,
@@ -16,9 +15,16 @@ export enum StructureItemType {
     Myelin,
     Axon,
     Selected,
+    /**
+     * Can be used for horizontal lines in dendrogram mode.
+     * Such segments are not interactive.
+     */
+    Liaison,
     Unknown,
 }
 export interface StructureItem {
+    parent?: StructureItem
+    children: StructureItem[]
     index: number
     name: string
     sectionName: string
@@ -31,6 +37,8 @@ export interface StructureItem {
     type: StructureItemType
     length: number
     distanceFromSoma: number
+    leavesCount: number
+    maxLength: number
 }
 
 export interface StructureBoundingBox {
@@ -76,7 +84,6 @@ export class Structure {
         for (const sectionName of sectionNames) {
             const isSoma = sectionName.toLowerCase().startsWith("soma")
             const section = morphology[sectionName]
-            let distanceFromSoma = section.distance_from_soma
             for (
                 let segmentIndex = 0;
                 segmentIndex < section.nseg;
@@ -96,6 +103,7 @@ export class Structure {
                 if (type === StructureItemType.ApicalDendrite)
                     hasApicalDendrites = true
                 const item: StructureItem = {
+                    children: [],
                     start,
                     end,
                     radius: section.diam[segmentIndex] / 2,
@@ -107,7 +115,9 @@ export class Structure {
                     segmentsCount: section.nseg,
                     length: section.length[segmentIndex],
                     type,
-                    distanceFromSoma: isSoma ? 0 : distanceFromSoma,
+                    distanceFromSoma: 0,
+                    leavesCount: 0,
+                    maxLength: 0,
                 }
                 this.segments.set(item.name, item)
                 this.addToSection(item)
@@ -127,7 +137,6 @@ export class Structure {
                     bboxSoma.max = computeMax(bboxSoma.max, end, item.radius)
                     isBBoxSomaEmpty = false
                 } else {
-                    distanceFromSoma += section.length[segmentIndex]
                     if (
                         [
                             StructureItemType.Dendrite,
