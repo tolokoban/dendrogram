@@ -34,12 +34,18 @@ export default function Viewer({ className }: ViewerProps) {
                     <div className={styles.grid}>
                         <div>Name:</div>
                         <b>{item.name}</b>
+                        <div>Section:</div>
+                        <b>{item.sectionName}</b>
+                        <div>Segment:</div>
+                        <b>{item.segmentIndex}</b>
                         <div>Leaves:</div>
                         <b>{item.leavesCount}</b>
                         <div>Max length:</div>
                         <b>{item.maxLength}</b>
                         <div>Children:</div>
                         <b>{item.children.length}</b>
+                        <div>Radius:</div>
+                        <b>{item.radius}</b>
                     </div>
                 )}
             </aside>
