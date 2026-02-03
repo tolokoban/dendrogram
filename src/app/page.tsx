@@ -1,6 +1,5 @@
-import { ViewerDendrogram } from "@/components/viewer-dendrogram"
-import { morphology } from "./morphology"
+import Viewer from "@/components/Viewer";
 
 export default function Page() {
-    return <ViewerDendrogram morphology={morphology} />
+    return <Viewer />;
 }
