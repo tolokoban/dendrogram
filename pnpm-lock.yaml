@@ -17,9 +17,6 @@ importers:
       '@tolokoban/type-guards':
         specifier: ^0.9.0
         version: 0.9.0
-      '@tolokoban/ui':
-        specifier: ^0.25.2
-        version: 0.25.2(react@19.2.3)
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -1479,11 +1476,6 @@ packages:
 
   '@tolokoban/type-guards@0.9.0':
     resolution: {integrity: sha512-MLOlLsGBrvol1yR25K/kai7/DoZtVYHmedRxKmjS8We7vwwas/9wyVvijAg0bcAucOSNOyWtviNikLkmvri9lQ==}
-
-  '@tolokoban/ui@0.25.2':
-    resolution: {integrity: sha512-zqswlwDDw26QrTqPWv8n7EfEgeoh54MPXezFBBPkKAnrg7CQMbhPQktzP+D9g1gt1VJWs9WYhcaGlK04ijfWDQ==}
-    peerDependencies:
-      react: ^19.2.0
 
   '@tsconfig/node10@1.0.12':
     resolution: {integrity: sha512-UCYBaeFvM11aU2y3YPZ//O5Rhj+xKyzy7mvcIoAjASbigy8mHMryP5cK7dgjlz2hWxh1g5pLw084E0a/wlUSFQ==}
@@ -7065,12 +7057,6 @@ snapshots:
       gl-matrix: 3.4.4
 
   '@tolokoban/type-guards@0.9.0': {}
-
-  '@tolokoban/ui@0.25.2(react@19.2.3)':
-    dependencies:
-      json5: 2.2.3
-      react: 19.2.3
-      tslib: 2.8.1
 
   '@tsconfig/node10@1.0.12': {}
 

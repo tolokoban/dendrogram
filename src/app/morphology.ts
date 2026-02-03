@@ -1,4 +1,4 @@
-import type { Morphology } from "@/services/bluenaas-single-cell/types"
+import type { Morphology } from "@/webgl-neuron-selector/types"
 
 export const morphology: Morphology = makeMorphology()
 

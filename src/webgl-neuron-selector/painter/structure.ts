@@ -1,6 +1,7 @@
 import { type ArrayNumber3, TgdVec3 } from "@tolokoban/tgd"
 
 import type { Morphology } from "../types"
+import { builTree, debugTree } from "./tree"
 
 export enum StructureItemType {
     Soma = 0,
@@ -48,6 +49,8 @@ export interface StructureBoundingBox {
 }
 
 export class Structure {
+    public readonly root: StructureItem
+
     public readonly bbox: StructureBoundingBox
 
     /**
@@ -181,9 +184,9 @@ export class Structure {
         if (somaCounts > 0) somaCenter.scale(1 / somaCounts)
         bbox.center = [...somaCenter] as ArrayNumber3
         this.hasApicalDendrites = hasApicalDendrites
-
         if (isBBoxSomaEmpty) copyBBoxInto(bbox, bboxSoma)
         if (isBBoxDendritesEmpty) copyBBoxInto(bbox, bboxDendrites)
+        this.root = builTree(this.items)
     }
 
     getSegmentsOfSection(sectionName: string): StructureItem[] {

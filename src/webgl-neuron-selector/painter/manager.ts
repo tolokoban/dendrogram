@@ -11,8 +11,7 @@ import {
     tgdCalcMapRange,
 } from "@tolokoban/tgd"
 import React from "react"
-import type { Morphology } from "@/services/bluenaas-single-cell/types"
-import { useVisibleSynapses } from "../hooks"
+import type { Morphology } from "../types"
 import { makeCamera } from "./camera"
 import { computeSectionOffset } from "./math"
 import { OffscreenPainter } from "./offscreen-painter"
