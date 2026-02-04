@@ -40,6 +40,12 @@ export interface StructureItem {
     distanceFromSoma: number
     leavesCount: number
     maxLength: number
+    /**
+     * Value between -1.0 and +1.0
+     *
+     * Used for dendrograms.
+     */
+    rank: number
 }
 
 export interface StructureBoundingBox {
@@ -121,6 +127,7 @@ export class Structure {
                     distanceFromSoma: 0,
                     leavesCount: 0,
                     maxLength: 0,
+                    rank: 0,
                 }
                 this.segments.set(item.name, item)
                 this.addToSection(item)

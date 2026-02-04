@@ -1,5 +1,5 @@
 import type { ArrayNumber3 } from "@tolokoban/tgd"
-import type { StructureItem } from "./structure"
+import { StructureItem, StructureItemType } from "./structure"
 
 export function builTree(items: StructureItem[]): StructureItem {
     const map = new Map<string, StructureItem>()
@@ -20,6 +20,8 @@ export function builTree(items: StructureItem[]): StructureItem {
         item.parent = root
     }
     populateTree(root)
+    computeRanks(root)
+    addLiaisons(root, items)
     return root
 }
 
@@ -51,4 +53,49 @@ function populateTree(item: StructureItem, distance = 0) {
         item.maxLength = Math.max(item.maxLength, child.maxLength)
     }
     item.maxLength += item.length
+}
+
+function computeRanks(item: StructureItem, rankMin = -1, rankMax = +1) {
+    if (!item) return
+
+    item.rank = (rankMin + rankMax) / 2
+    const rankSize = Math.abs(rankMax - rankMin)
+    let rank = rankMin
+    for (const child of item.children) {
+        const rankChildSize = (rankSize * child.leavesCount) / item.leavesCount
+        computeRanks(child, rank, rank + rankChildSize)
+        rank += rankChildSize
+    }
+}
+
+/**
+ * We want to be able to transition smoothly between the 3D view and the dendrogram view.
+ * That's why we need to have the exact same number of segments in both views.
+ * The `liaisons` are non-interactive horizontal segments, that will ony have a non-null length
+ * in dendrogram mode.
+ */
+function addLiaisons(root: StructureItem, items: StructureItem[]) {
+    if (!root) return
+
+    if (root.children.length > 1) {
+        for (let index = 0; index < root.children.length; index++) {
+            const child = root.children[index]
+            const liaison: StructureItem = {
+                ...child,
+                name: `${root.name} > ${child.name}`,
+                type: StructureItemType.Liaison,
+                start: [...root.end],
+                end: [...child.start],
+                radius: 1e-3,
+                children: [child],
+            }
+            items.push(liaison)
+            root.children[index] = liaison
+            addLiaisons(child, items)
+        }
+    } else {
+        for (const child of root.children) {
+            addLiaisons(child, items)
+        }
+    }
 }
