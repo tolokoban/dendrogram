@@ -1,6 +1,7 @@
 /* eslint-disable no-bitwise */
 import {
     TgdContext,
+    TgdDataset,
     TgdPainterClear,
     TgdPainterGroup,
     TgdPainterSegments,
@@ -8,7 +9,6 @@ import {
     webglPresetDepth,
 } from "@tolokoban/tgd"
 import { Structure, StructureItem } from "../structure"
-import { makeSegments3D } from "../segments"
 import { MaterialIndex } from "./material-index"
 
 export class OffscreenPainter {
@@ -16,7 +16,7 @@ export class OffscreenPainter {
 
     private readonly offscreenContext: TgdContext
 
-    private _structure: Structure | null = null
+    private _structure: Structure | undefined = undefined
 
     private readonly group = new TgdPainterGroup()
 
@@ -37,29 +37,28 @@ export class OffscreenPainter {
         return this._structure
     }
 
-    set structure(value: Structure | null) {
+    set structure(value: Structure | undefined) {
         if (value === this._structure) return
 
         this._structure = value
+    }
+
+    set dataset(dataset: TgdDataset) {
         this.group.delete()
-        if (value) {
-            const segments = makeSegments3D(value)
-            const context = this.offscreenContext
-            this.group.add(
-                new TgdPainterClear(context, { color: [0, 0, 0, 1], depth: 1 }),
-                new TgdPainterState(context, {
-                    depth: webglPresetDepth.lessOrEqual,
-                    children: [
-                        new TgdPainterSegments(context, {
-                            roundness: 3,
-                            minRadius: 4,
-                            makeDataset: segments.makeDataset,
-                            material: new MaterialIndex(),
-                        }),
-                    ],
-                })
-            )
-        }
+        const context = this.offscreenContext
+        const painter = new TgdPainterSegments(context, {
+            roundness: 3,
+            minRadius: 3,
+            dataset,
+            material: new MaterialIndex(),
+        })
+        this.group.add(
+            new TgdPainterClear(context, { color: [0, 0, 0, 1], depth: 1 }),
+            new TgdPainterState(context, {
+                depth: webglPresetDepth.lessOrEqual,
+                children: [painter],
+            })
+        )
     }
 
     getItemAt(xScreen: number, yScreen: number): StructureItem | null {

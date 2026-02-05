@@ -84,6 +84,7 @@ function addLiaisons(root: StructureItem, items: StructureItem[]) {
                 ...child,
                 name: `${root.name} > ${child.name}`,
                 type: StructureItemType.Liaison,
+                index: root.index,
                 start: [...root.end],
                 end: [...child.start],
                 radius: 1e-3,

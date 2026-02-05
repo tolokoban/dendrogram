@@ -6,46 +6,56 @@ import {
 
 import { type Structure, StructureItem, StructureItemType } from "./structure"
 
-export function makeSegments3D(structure: Structure) {
+const HIGHLIGHT_RADIUS_MULTIPLIER = 1.5
+
+export function makeSegments3D(
+    structure: Structure,
+    map: Map<number, TgdPainterSegmentsData>
+) {
     const segments = new TgdPainterSegmentsData()
     structure.forEach((item) => {
-        const uv: ArrayNumber2 = [
-            (item.type + 0.5) / (StructureItemType.Unknown + 1),
-            (item.index + 1.5) / (structure.length + 2),
-        ]
-        segments.add(
-            [...item.start, item.radius],
-            [...item.end, item.radius],
-            uv,
-            uv
-        )
+        const { start, end } = item
+        processSegment(item, structure, segments, start, end, map)
     })
     return segments
 }
 
-export function makeSegmentsDendrogram(structure: Structure) {
+export function makeSegmentsDendrogram(
+    structure: Structure,
+    map: Map<number, TgdPainterSegmentsData>
+) {
     const width = Math.abs(structure.bbox.max[0] - structure.bbox.min[0])
-    console.log("🐞 [segments@28] structure =", structure) // @FIXME: Remove this line written on 2026-02-04 at 15:43
-    console.log("🐞 [segments@29] width =", width) // @FIXME: Remove this line written on 2026-02-04 at 15:43
     const segments = new TgdPainterSegmentsData()
     structure.forEach((item) => {
-        const uv: ArrayNumber2 = [
-            (item.type + 0.5) / (StructureItemType.Unknown + 1),
-            (item.index + 1.5) / (structure.length + 2),
-        ]
         const start = computeDendrogramStart(item, width)
         const end = computeDendrogramEnd(item, width)
-        const segment = segments.add(
-            [...start, item.radius],
-            [...end, item.radius],
-            uv,
-            uv
-        )
-        if (item.type === StructureItemType.Liaison) {
-            console.log("🐞 [segments@40] segment, item =", segment, item) // @FIXME: Remove this line written on 2026-02-04 at 16:16
-        }
+        processSegment(item, structure, segments, start, end, map)
     })
     return segments
+}
+
+function processSegment(
+    item: StructureItem,
+    structure: Structure,
+    segments: TgdPainterSegmentsData,
+    start: ArrayNumber3,
+    end: ArrayNumber3,
+    map: Map<number, TgdPainterSegmentsData>
+) {
+    const uv: ArrayNumber2 = [
+        (item.type + 0.5) / (StructureItemType.Unknown + 1),
+        (item.index + 1.5) / (structure.length + 2),
+    ]
+    segments.add([...start, item.radius], [...end, item.radius], uv, uv)
+    /**
+     * Singletons are used to paint highlights.
+     */
+    const singleton = new TgdPainterSegmentsData()
+    const radius = item.radius * HIGHLIGHT_RADIUS_MULTIPLIER
+    singleton.add([...start, radius], [...end, radius], uv, uv)
+    if (item.type !== StructureItemType.Liaison) {
+        map.set(item.index, singleton)
+    }
 }
 
 function computeDendrogramStart(

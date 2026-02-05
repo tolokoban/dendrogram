@@ -1,10 +1,12 @@
 import {
     type TgdContext,
+    TgdDataset,
     TgdLight,
     TgdMaterialDiffuse,
     TgdPainterClear,
     TgdPainterGroup,
     TgdPainterSegments,
+    TgdPainterSegmentsData,
     TgdPainterState,
     TgdTexture2D,
     TgdVec3,
@@ -12,15 +14,12 @@ import {
     webglPresetDepth,
 } from "@tolokoban/tgd"
 
-import { makeSegments3D, makeSegmentsDendrogram } from "../segments"
-import { Structure, type StructureItem } from "../structure"
+import { type StructureItem } from "../structure"
 import { PALETTE } from "./contants"
 import { PainterHover as PainterHighlight } from "./highlight"
 import { PainterSynapses } from "./synapses"
 
 export class Painter extends TgdPainterGroup {
-    private _structure = new Structure({})
-
     private readonly groupSegments = new TgdPainterGroup()
 
     private readonly groupSynapses = new TgdPainterGroup()
@@ -28,6 +27,8 @@ export class Painter extends TgdPainterGroup {
     private readonly groupHover = new TgdPainterGroup()
 
     private readonly palette: TgdTexture2D
+
+    private _painterSegments: TgdPainterSegments | null = null
 
     private _synapses: Array<{ color: string; data: Float32Array }> | null =
         null
@@ -51,6 +52,10 @@ export class Painter extends TgdPainterGroup {
                 ],
             })
         )
+    }
+
+    get painterSegments() {
+        return this._painterSegments
     }
 
     get synapsesEnabled() {
@@ -78,41 +83,33 @@ export class Painter extends TgdPainterGroup {
         this.context.paint()
     }
 
-    get structure() {
-        return this._structure
-    }
-
-    set structure(value: Structure) {
+    set dataset(dataset: TgdDataset) {
         const { context } = this
-        this._structure = value
-        const segments3d = makeSegments3D(value)
-        const segmentsDendrogram = makeSegmentsDendrogram(value)
-        const segments = segmentsDendrogram
         this.groupSegments.delete()
-        this.groupSegments.add(
-            new TgdPainterSegments(context, {
-                roundness: 6,
-                minRadius: 0.5,
-                makeDataset: segments.makeDataset,
-                material: new TgdMaterialDiffuse({
-                    color: this.palette,
-                    specularExponent: 1,
-                    specularIntensity: 0.25,
-                    lockLightsToCamera: true,
-                    light: new TgdLight({
-                        direction: new TgdVec3(0, 0, -1),
-                    }),
+        const painterSegments = new TgdPainterSegments(context, {
+            roundness: 6,
+            minRadius: 0.5,
+            dataset,
+            material: new TgdMaterialDiffuse({
+                color: this.palette,
+                specularExponent: 1,
+                specularIntensity: 0.25,
+                lockLightsToCamera: true,
+                light: new TgdLight({
+                    direction: new TgdVec3(0, 0, -1),
                 }),
-            })
-        )
+            }),
+        })
+        this._painterSegments = painterSegments
+        this.groupSegments.add(painterSegments)
         context.paint()
     }
 
-    highlight(item: StructureItem | null) {
+    highlight(segments: TgdPainterSegmentsData | null | undefined) {
         const { groupHover, context } = this
         groupHover.delete()
-        if (item) {
-            groupHover.add(new PainterHighlight(context, item))
+        if (segments) {
+            groupHover.add(new PainterHighlight(context, segments))
         }
         context.paint()
     }

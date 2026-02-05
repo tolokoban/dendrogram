@@ -64,7 +64,6 @@ async function loadMorphology() {
             segment_distance_from_soma: ["array", "number"],
         },
     ]);
-    console.log("🐞 [index@65] data =", data); // @FIXME: Remove this line written on 2026-02-03 at 13:36
     return data;
 }
 

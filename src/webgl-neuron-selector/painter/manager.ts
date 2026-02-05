@@ -5,6 +5,7 @@ import {
     type TgdCameraState,
     TgdContext,
     TgdControllerCameraOrbit,
+    TgdDataset,
     TgdEvent,
     TgdMat4,
     TgdVec3,
@@ -16,7 +17,8 @@ import { makeCamera } from "./camera"
 import { computeSectionOffset } from "./math"
 import { OffscreenPainter } from "./offscreen-painter"
 import { Painter } from "./painters"
-import { Structure, type StructureItem } from "./structure"
+import { type StructureItem } from "./structure"
+import { MorphologyData } from "./morphology-data"
 
 interface SelectedItem {
     x: number
@@ -65,7 +67,7 @@ export class PainterManager {
 
     private offscreen: OffscreenPainter | null = null
 
-    private structure: Structure | null = null
+    private dataset: TgdDataset | null = null
 
     private _hoverItem: SelectedItem = { x: 0, y: 0, offset: 0, item: null }
 
@@ -74,6 +76,8 @@ export class PainterManager {
     private cameraController: TgdControllerCameraOrbit | null = null
 
     private synapses: Array<{ color: string; data: Float32Array }> = []
+
+    private data: MorphologyData | null = null
 
     /**
      * When is the last time the camera moved?
@@ -184,16 +188,18 @@ export class PainterManager {
         this._morphology = morphology
         if (!morphology) return
 
-        const structure = new Structure(morphology)
-        this.structure = structure
+        this.data = new MorphologyData(morphology)
         const { offscreen, painter, context } = this
-        if (offscreen) offscreen.structure = structure
         if (context && painter) {
-            const { camera, zoomMin, zoomMax } = makeCamera(structure)
+            const { camera, zoomMin, zoomMax } = makeCamera(this.data.structure)
             context.camera = camera
             this.initialPosition.from(context.camera.transfo.position)
             this.initCameraController(context, zoomMin, zoomMax)
-            painter.structure = structure
+            painter.dataset = this.data.datasetDendrogram
+        }
+        if (offscreen) {
+            offscreen.structure = this.data.structure
+            offscreen.dataset = this.data.datasetDendrogram
         }
     }
 
@@ -240,7 +246,7 @@ export class PainterManager {
      * @param offset
      */
     getSectionCoordinates(sectionName: string, offset: number): TgdVec3 {
-        const { structure } = this
+        const structure = this.data?.structure
         if (!structure) return new TgdVec3()
 
         const segments = structure.getSegmentsOfSection(sectionName) ?? []
@@ -271,7 +277,7 @@ export class PainterManager {
         sectionName: string,
         sectionOffset: number
     ): StructureItem | null {
-        const { structure } = this
+        const structure = this.data?.structure
         if (!structure) return null
 
         const segments = structure.getSegmentsOfSection(sectionName)
@@ -299,8 +305,8 @@ export class PainterManager {
     }
 
     private initialize() {
-        const { canvas } = this
-        if (this.context || !canvas) return
+        const { canvas, data } = this
+        if (this.context || !canvas || !data) return
 
         const context = new TgdContext(canvas, {
             alpha: false,
@@ -317,15 +323,13 @@ export class PainterManager {
         this.initOffscreen(context)
         this.eventHintVisible.dispatch(false)
         // Initialize painter.
-        const { structure, painter } = this
+        const { painter } = this
         painter.synapses = this.synapses
-        if (structure) {
-            const { camera, zoomMin, zoomMax } = makeCamera(structure)
-            context.camera = camera
-            this.initialPosition.from(context.camera.transfo.position)
-            this.initCameraController(context, zoomMin, zoomMax)
-            painter.structure = structure
-        }
+        const { camera, zoomMin, zoomMax } = makeCamera(data.structure)
+        context.camera = camera
+        this.initialPosition.from(context.camera.transfo.position)
+        this.initCameraController(context, zoomMin, zoomMax)
+        painter.dataset = data.datasetDendrogram
         if (this.lastCameraState) {
             // Restore camera state
             context.camera.setCurrentState(this.lastCameraState)
@@ -340,10 +344,10 @@ export class PainterManager {
      */
     private initOffscreen(context: TgdContext) {
         this.offscreen = new OffscreenPainter(context)
-        this.offscreen.structure = this.structure
+        this.offscreen.structure = this.data?.structure
         context.inputs.pointer.eventHover.addListener((evt) => {
-            const { painter, structure } = this
-            if (!painter || !structure) return
+            const { painter, data } = this
+            if (!painter || !data) return
 
             const { x, y } = evt.current
             const item = this.offscreen?.getItemAt(x, y) ?? null
@@ -351,9 +355,10 @@ export class PainterManager {
                 painter.highlight(null)
                 let offset = 0
                 if (item) {
-                    painter.highlight(item)
+                    const segments = data.segmentsDendrogram.get(item.index)
+                    painter.highlight(segments)
                     offset = computeSectionOffset(
-                        structure,
+                        data.structure,
                         item,
                         context.camera,
                         x,
@@ -378,14 +383,14 @@ export class PainterManager {
             // Prevent camera movement to be interpreted as a click.
             if (Date.now() - this.lastCameraChangeTimestamp < 300) return
 
-            const { structure } = this
-            if (!this.context || !structure) return
+            const { data } = this
+            if (!this.context || !data) return
 
             const { x, y } = evt
             const item = this.offscreen?.getItemAt(x, y) ?? null
             if (item) {
                 const segment = computeSectionOffset(
-                    structure,
+                    data.structure,
                     item,
                     this.context.camera,
                     x,
