@@ -5,6 +5,7 @@ import {
     TgdDataset,
     TgdPainterClear,
     TgdPainterGroup,
+    TgdPainterLogic,
     TgdPainterSegmentsMorphing,
     TgdPainterState,
     webglPresetDepth,
@@ -14,6 +15,8 @@ import { StructureItem } from "../structure"
 import { MaterialIndex } from "./material-index"
 
 export class OffscreenPainter {
+    public mix = 0
+
     private readonly offscreenCanvas = new OffscreenCanvas(1, 1)
 
     private readonly offscreenContext: TgdContext
@@ -57,6 +60,9 @@ export class OffscreenPainter {
             material: new MaterialIndex(),
         })
         this.group.add(
+            new TgdPainterLogic(() => {
+                painter.mix = this.mix
+            }),
             new TgdPainterClear(context, { color: [0, 0, 0, 1], depth: 1 }),
             new TgdPainterState(context, {
                 depth: webglPresetDepth.lessOrEqual,

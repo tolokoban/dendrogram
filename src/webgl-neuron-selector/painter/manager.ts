@@ -2,6 +2,7 @@
 /* eslint-disable no-param-reassign */
 
 import {
+    ArrayNumber3,
     type TgdCameraState,
     TgdContext,
     TgdControllerCameraOrbit,
@@ -12,14 +13,18 @@ import {
     tgdCalcMapRange,
 } from "@tolokoban/tgd"
 import React from "react"
-import type { Morphology, WebglNeuronSelectorContentProps } from "../types"
+import type {
+    Morphology,
+    ViewMode,
+    WebglNeuronSelectorContentProps,
+} from "../types"
 import { makeCamera } from "./camera"
 import { computeSectionOffset } from "./math"
 import { OffscreenPainter } from "./offscreen-painter"
 import { Painter } from "./painters"
 import { type StructureItem } from "./structure"
 import { MorphologyData } from "./morphology-data"
-import { TransitionManager, ViewMode } from "./transition"
+import { TransitionManager } from "./transition"
 import { Initializer } from "./initializer"
 
 interface SelectedItem {
@@ -219,11 +224,25 @@ export class PainterManager extends Initializer {
             const previousDistance = distance
             distance += segment.length
             if (distance >= targetDistance) {
+                const seg1 = this.data?.segments3D.get(segment.index)
+                const seg2 = this.data?.segmentsDendrogram.get(segment.index)
+                if (!seg1 || !seg2) continue
+
                 const segmentOffset =
                     (targetDistance - previousDistance) / segment.length
+                const start: TgdVec3 = TgdVec3.newFromMix(
+                    seg1.getXYZR0(0),
+                    seg2.getXYZR0(0),
+                    this.view.mix
+                )
+                const end: TgdVec3 = TgdVec3.newFromMix(
+                    seg1.getXYZR1(0),
+                    seg2.getXYZR1(0),
+                    this.view.mix
+                )
                 const point = TgdVec3.newFromMix(
-                    segment.start,
-                    segment.end,
+                    start, // segment.start,
+                    end, // segment.end,
                     segmentOffset
                 )
                 return point

@@ -25,12 +25,19 @@ export class TransitionManager {
 
     private _mode: ViewMode = "3d"
 
-    private mix = 0
+    private _mix = 0
 
     private ongoingAnimations: TgdAnimation[] = []
 
     constructor(public readonly duration = 2) {
         this.logic = new TgdPainterLogic(this.actualPaint)
+    }
+
+    get mix() {
+        return this._mix
+    }
+    private set mix(mix: number) {
+        this._mix = mix
     }
 
     get context() {
@@ -77,10 +84,13 @@ export class TransitionManager {
     }
 
     private readonly actualPaint = (time: number, delta: number) => {
-        const { painter } = this
+        const { painter, offscreen } = this
         if (painter) {
             painter.mix = this.mix
             painter.paint(time, delta)
+        }
+        if (offscreen) {
+            offscreen.mix = this.mix
         }
     }
 
