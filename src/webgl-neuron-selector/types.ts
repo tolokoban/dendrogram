@@ -63,3 +63,5 @@ export interface WebglNeuronSelectorProps extends ElectrodesProps {
 export interface WebglNeuronSelectorContentProps extends WebglNeuronSelectorProps {
     painterManager: PainterManager
 }
+
+export type ViewMode = "3d" | "dendrogram"

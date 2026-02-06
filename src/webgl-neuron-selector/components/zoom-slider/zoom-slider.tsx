@@ -3,7 +3,7 @@ import React from "react";
 import { Slider } from "antd";
 import { ZoomInOutlined, ZoomOutOutlined } from "@ant-design/icons";
 
-import { PainterManager } from "../painter";
+import { PainterManager } from "../../painter";
 
 import { classNames, useEventValue } from "@/util/utils";
 

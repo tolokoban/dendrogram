@@ -97,6 +97,11 @@ export class PainterManager extends Initializer {
 
     private _clickable = true
 
+    constructor() {
+        super()
+        this.view.eventResetCamera.addListener(this.resetCamera)
+    }
+
     get mode() {
         return this.view.mode
     }

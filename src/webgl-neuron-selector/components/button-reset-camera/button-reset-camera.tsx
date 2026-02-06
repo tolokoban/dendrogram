@@ -3,7 +3,7 @@ import React from "react";
 import Tooltip from "@/components/tooltip";
 import { classNames, useEventValue } from "@/util/utils";
 
-import { PainterManager } from "../painter";
+import { PainterManager } from "../../painter";
 import { IconCenter } from "../icons/center";
 
 import styles from "./button-reset-camera.module.css";

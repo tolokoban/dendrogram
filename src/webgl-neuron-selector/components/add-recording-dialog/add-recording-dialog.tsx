@@ -4,11 +4,11 @@ import React from "react";
 
 import { classNames, useEventValue } from "@/util/utils";
 
-import { useRecordingsAndInjection } from "../hooks";
+import { useRecordingsAndInjection } from "../../hooks";
 import { HintContent } from "../hint";
 import { useEscapeHandler } from "./hooks";
 import { IconClose } from "../icons/close";
-import { WebglNeuronSelectorContentProps } from "../types";
+import { WebglNeuronSelectorContentProps } from "../../types";
 
 import styles from "./add-recording-dialog.module.css";
 

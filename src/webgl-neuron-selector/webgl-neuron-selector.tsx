@@ -1,35 +1,62 @@
 /* eslint-disable no-param-reassign */
 import React from "react";
-import AddRecordingDialog from "./add-recording-dialog";
-import { ButtonResetCamera } from "./button-reset-camera";
-import { HintPanel } from "./hint";
-import LegendOverlay from "./legend-overlay";
-import { usePainterController, useWebglNeuronSelector } from "./painter";
-import styles from "./webgl-neuron-selector.module.css";
-import ZoomSlider from "./zoom-slider";
+import AddRecordingDialog from "./components/add-recording-dialog";
+import { ButtonResetCamera } from "./components/button-reset-camera";
+import { HintPanel } from "./components/hint";
+import LegendOverlay from "./components/legend-overlay";
 import {
-    WebglNeuronSelectorContentProps,
-    WebglNeuronSelectorProps,
-} from "./types";
+    PainterManager,
+    usePainterController,
+    useWebglNeuronSelector,
+} from "./painter";
+import styles from "./webgl-neuron-selector.module.css";
+import ZoomSlider from "./components/zoom-slider";
+import { WebglNeuronSelectorProps } from "./types";
+import ModeSelector from "./components/ModeSelector";
+import { FullscreenOutlined } from "@ant-design/icons";
+import { tgdFullscreenToggle } from "@tolokoban/tgd";
 
 // eslint-disable-next-line react/display-name
-export const WebglNeuronSelector = React.memo(
-    (props: WebglNeuronSelectorProps) => {
-        const painterManager = useWebglNeuronSelector(props.morphology);
-        const extraProps: WebglNeuronSelectorContentProps = {
-            ...props,
-            painterManager,
-        };
-        return <WebglNeuronSelectorContent {...extraProps} />;
-    },
-);
-
-function WebglNeuronSelectorContent(props: WebglNeuronSelectorContentProps) {
-    const { painterManager } = props;
-    usePainterController(props);
+export function WebglNeuronSelector(props: WebglNeuronSelectorProps) {
+    const painterManager = useWebglNeuronSelector(props.morphology);
+    const extraProps = { ...props, painterManager };
+    usePainterController(extraProps);
+    const ref = React.useRef<HTMLDivElement | null>(null);
+    const handleFullscreen = () => {
+        void tgdFullscreenToggle(ref.current);
+    };
 
     return (
-        <div className={styles.main}>
+        <div className={styles.main} ref={ref}>
+            <Canvas painterManager={painterManager} />
+            <HintPanel painterManager={painterManager} />
+            <header>
+                <ModeSelector painterManager={painterManager} />
+                <div className={styles.flex}>
+                    <ZoomSlider
+                        className={styles.zoomSlider}
+                        painterManager={painterManager}
+                    />
+                    <ButtonResetCamera painterManager={painterManager} />
+                </div>
+                <div className={styles.flex}>
+                    <button
+                        type="button"
+                        onClick={handleFullscreen}
+                    >
+                        <FullscreenOutlined />
+                    </button>
+                </div>
+            </header>
+            <LegendOverlay {...extraProps} />
+            <AddRecordingDialog {...extraProps} />
+        </div>
+    );
+}
+
+const Canvas = React.memo(
+    ({ painterManager }: { painterManager: PainterManager }) => {
+        return (
             <canvas
                 key="canvas"
                 ref={(canvas: HTMLCanvasElement | null) => {
@@ -39,16 +66,6 @@ function WebglNeuronSelectorContent(props: WebglNeuronSelectorContentProps) {
                     };
                 }}
             />
-            <HintPanel painterManager={painterManager} />
-            <header>
-                <ZoomSlider
-                    className={styles.zoomSlider}
-                    painterManager={painterManager}
-                />
-                <ButtonResetCamera painterManager={painterManager} />
-            </header>
-            <LegendOverlay {...props} />
-            <AddRecordingDialog {...props} />
-        </div>
-    );
-}
+        );
+    },
+);

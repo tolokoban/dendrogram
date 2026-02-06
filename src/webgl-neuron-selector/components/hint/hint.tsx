@@ -1,7 +1,7 @@
 import React from "react";
 
-import { PainterManager } from "../painter";
-import { StructureItem, StructureItemType } from "../painter/structure";
+import { PainterManager } from "../../painter";
+import { StructureItem, StructureItemType } from "../../painter/structure";
 
 import { classNames, useEventValue } from "@/util/utils";
 

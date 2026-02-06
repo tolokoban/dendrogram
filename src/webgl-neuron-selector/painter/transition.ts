@@ -1,18 +1,20 @@
 import {
-    tgdCalcMapRange,
-    tgdCalcModulo,
+    TgdAnimation,
+    tgdCalcMix,
     TgdContext,
+    TgdEvent,
     TgdPainterLogic,
 } from "@tolokoban/tgd"
 import { OffscreenPainter } from "./offscreen-painter"
 import { Painter } from "./painters"
-
-export type ViewMode = "3d" | "dendrogram"
+import { ViewMode } from "../types"
 
 /**
  * Manage the transition between views.
  */
 export class TransitionManager {
+    public readonly eventResetCamera = new TgdEvent()
+
     public painter: Painter | null = null
 
     public offscreen: OffscreenPainter | null = null
@@ -25,7 +27,9 @@ export class TransitionManager {
 
     private mix = 0
 
-    constructor() {
+    private ongoingAnimations: TgdAnimation[] = []
+
+    constructor(public readonly duration = 2) {
         this.logic = new TgdPainterLogic(this.actualPaint)
     }
 
@@ -52,7 +56,7 @@ export class TransitionManager {
         const oldMode = this._mode
         if (oldMode === newMode) return
 
-        this._mode = newMode
+        this.scheduleAnim(newMode)
     }
 
     paint() {
@@ -75,20 +79,37 @@ export class TransitionManager {
     private readonly actualPaint = (time: number, delta: number) => {
         const { painter } = this
         if (painter) {
-            // const DURATION = 8
-            // const PAUSE = 1
-            // const span = tgdCalcModulo(time, 0, DURATION + PAUSE)
-            // const angle = tgdCalcMapRange(
-            //     span,
-            //     0,
-            //     DURATION,
-            //     0,
-            //     2 * Math.PI,
-            //     true
-            // )
-            // const mix = tgdCalcMapRange(Math.cos(angle), -1, +1, 0, 1)
             painter.mix = this.mix
             painter.paint(time, delta)
+        }
+    }
+
+    private readonly scheduleAnim = (newMode: ViewMode) => {
+        const { context, painter, offscreen } = this
+        if (!context || !painter || !offscreen) return
+
+        this._mode = newMode
+        this.eventResetCamera.dispatch()
+        if (newMode === "dendrogram") {
+            context.animCancelArray(this.ongoingAnimations)
+            const mixStart = this.mix
+            const mixEnd = 1
+            this.ongoingAnimations = context.animSchedule({
+                duration: this.duration * Math.abs(mixEnd - mixStart),
+                action: (alpha) => {
+                    this.mix = tgdCalcMix(mixStart, mixEnd, alpha)
+                },
+            })
+        } else if (newMode === "3d") {
+            context.animCancelArray(this.ongoingAnimations)
+            const mixStart = this.mix
+            const mixEnd = 0
+            this.ongoingAnimations = context.animSchedule({
+                duration: this.duration * Math.abs(mixEnd - mixStart),
+                action: (alpha) => {
+                    this.mix = tgdCalcMix(mixStart, mixEnd, alpha)
+                },
+            })
         }
     }
 }

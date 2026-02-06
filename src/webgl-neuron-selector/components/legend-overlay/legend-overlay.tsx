@@ -1,12 +1,12 @@
 import React from "react";
 
-import { useRecordingsAndInjection } from "../hooks";
+import { useRecordingsAndInjection } from "../../hooks";
 import { LegendTarget, useLegendPainter } from "./legend-painter";
 
 import { classNames } from "@/util/utils";
 
 import styles from "./legend-overlay.module.css";
-import { WebglNeuronSelectorContentProps } from "../types";
+import { WebglNeuronSelectorContentProps } from "../../types";
 
 export default function LegendOverlay(
     props: WebglNeuronSelectorContentProps & { className?: string },
