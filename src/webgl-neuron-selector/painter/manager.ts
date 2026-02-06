@@ -5,9 +5,9 @@ import {
     type TgdCameraState,
     TgdContext,
     TgdControllerCameraOrbit,
-    TgdDataset,
     TgdEvent,
     TgdMat4,
+    TgdPainterSegmentsData,
     TgdVec3,
     tgdCalcMapRange,
 } from "@tolokoban/tgd"
@@ -19,6 +19,8 @@ import { OffscreenPainter } from "./offscreen-painter"
 import { Painter } from "./painters"
 import { type StructureItem } from "./structure"
 import { MorphologyData } from "./morphology-data"
+import { TransitionManager, ViewMode } from "./transition"
+import { Initializer } from "./initializer"
 
 interface SelectedItem {
     x: number
@@ -26,7 +28,13 @@ interface SelectedItem {
     item: StructureItem | null
     offset: number
 }
-export class PainterManager {
+
+const EMPTY_SEGMENTS: Readonly<Map<number, TgdPainterSegmentsData>> = new Map<
+    number,
+    TgdPainterSegmentsData
+>()
+
+export class PainterManager extends Initializer {
     private static id = 0
 
     public disableElectrodes = false
@@ -46,7 +54,10 @@ export class PainterManager {
         offset: number
     }>()
 
-    /** Event for normalized zoom changes. */
+    /**
+     * Event for normalized zoom changes.
+     * The value is between `-1.0` and `+1.0`
+     */
     public readonly eventZoom = new TgdEvent<number>()
 
     public readonly eventRestingPosition = new TgdEvent<boolean>()
@@ -55,19 +66,9 @@ export class PainterManager {
 
     public readonly eventForbiddenClick = new TgdEvent<void>()
 
-    private painter: Painter | null = null
+    private readonly view = new TransitionManager()
 
     private _disableSynapses = false
-
-    private _morphology: Morphology | null = null
-
-    private _canvas: HTMLCanvasElement | null = null
-
-    private context: TgdContext | null = null
-
-    private offscreen: OffscreenPainter | null = null
-
-    private dataset: TgdDataset | null = null
 
     private _hoverItem: SelectedItem = { x: 0, y: 0, offset: 0, item: null }
 
@@ -96,13 +97,21 @@ export class PainterManager {
 
     private _clickable = true
 
+    get mode() {
+        return this.view.mode
+    }
+
+    set mode(value: ViewMode) {
+        this.view.mode = value
+    }
+
     get disableSynapses() {
         return this._disableSynapses
     }
 
     set disableSynapses(value: boolean) {
         this._disableSynapses = value
-        const { painter } = this
+        const { painter } = this.view
         if (painter) painter.synapsesEnabled = !value
     }
 
@@ -112,7 +121,7 @@ export class PainterManager {
 
     set clickable(value: boolean) {
         this._clickable = value
-        this.context?.paint()
+        this.view.context?.paint()
     }
 
     get hoverItem() {
@@ -128,7 +137,8 @@ export class PainterManager {
      * This normalized zoom is between -1 and +1.
      */
     get zoom() {
-        const { context, cameraController } = this
+        const { view, cameraController } = this
+        const { context } = view
         if (!context || !cameraController) return 0
 
         return this.toNormalizedZoom(cameraController.zoom)
@@ -144,7 +154,7 @@ export class PainterManager {
         const zoom = this.toControllerZoom(value)
         cameraController.zoom = zoom
         this.eventZoom.dispatch(value)
-        this.context?.paint()
+        this.view.paint()
     }
 
     readonly zoomOut = () => {
@@ -155,56 +165,8 @@ export class PainterManager {
         this.zoom += 0.1
     }
 
-    get canvas() {
-        return this._canvas
-    }
-
-    set canvas(canvas: HTMLCanvasElement | null) {
-        if (this._canvas === canvas) return
-
-        canvas?.addEventListener("dblclick", (evt) => {
-            if (!evt.shiftKey) return
-
-            const URL = `data:application/json,${encodeURI(JSON.stringify(this.morphology))}`
-            console.log(URL)
-            globalThis.open(URL, "_blank")
-        })
-        this._canvas = canvas
-        if (canvas) this.initialize()
-        else this.delete()
-    }
-
-    get morphology() {
-        return this._morphology
-    }
-
-    set morphology(morphology: Morphology | null) {
-        if (
-            !morphology ||
-            JSON.stringify(this._morphology) !== JSON.stringify(morphology)
-        ) {
-            this.lastCameraState = null
-        }
-        this._morphology = morphology
-        if (!morphology) return
-
-        this.data = new MorphologyData(morphology)
-        const { offscreen, painter, context } = this
-        if (context && painter) {
-            const { camera, zoomMin, zoomMax } = makeCamera(this.data.structure)
-            context.camera = camera
-            this.initialPosition.from(context.camera.transfo.position)
-            this.initCameraController(context, zoomMin, zoomMax)
-            painter.dataset = this.data.datasetDendrogram
-        }
-        if (offscreen) {
-            offscreen.structure = this.data.structure
-            offscreen.dataset = this.data.datasetDendrogram
-        }
-    }
-
     getCameraMatrix(): Readonly<TgdMat4> {
-        const { context } = this
+        const { context } = this.view
         if (!context) return new TgdMat4()
 
         const { camera } = context
@@ -214,7 +176,8 @@ export class PainterManager {
     }
 
     readonly resetCamera = () => {
-        const { context, cameraController } = this
+        const { view, cameraController } = this
+        const { context } = view
         if (!context || !cameraController) return
 
         const { zoom } = this
@@ -227,16 +190,7 @@ export class PainterManager {
     }
 
     delete() {
-        this.painter?.delete()
-        this.painter = null
-        if (this.context) {
-            this.context.delete()
-            this.context = null
-        }
-        if (this.offscreen) {
-            this.offscreen.delete()
-            this.offscreen = null
-        }
+        this.view.delete()
     }
 
     /**
@@ -298,43 +252,51 @@ export class PainterManager {
 
     showSynapses(synapses: Array<{ color: string; data: Float32Array }>) {
         this.synapses = synapses
-        const { context, painter } = this
+        const { context, painter } = this.view
         if (!context || !painter) return
 
         painter.synapses = synapses
     }
 
-    private initialize() {
-        const { canvas, data } = this
-        if (this.context || !canvas || !data) return
+    protected initialize(canvas: HTMLCanvasElement, data: MorphologyData) {
+        this.data = data
+        const context = this.initContext(canvas, data)
+        this.initPainter(context, data)
+        context.eventPaint.addListener(this.handlePaint)
+        this.initOffscreen(context, data)
+        this.eventHintVisible.dispatch(false)
+    }
 
+    private initContext(canvas: HTMLCanvasElement, data: MorphologyData) {
         const context = new TgdContext(canvas, {
             alpha: false,
             antialias: true,
         })
-        this.painter = new Painter(context)
-        context.add(this.painter)
         context.eventWebGLContextRestored.addListener(() => {
             this.delete()
-            globalThis.requestAnimationFrame(() => this.initialize())
+            globalThis.requestAnimationFrame(() =>
+                this.initialize(canvas, data)
+            )
         })
-        context.eventPaint.addListener(this.handlePaint)
-        this.context = context
-        this.initOffscreen(context)
-        this.eventHintVisible.dispatch(false)
-        // Initialize painter.
-        const { painter } = this
-        painter.synapses = this.synapses
+        this.view.context = context
         const { camera, zoomMin, zoomMax } = makeCamera(data.structure)
         context.camera = camera
         this.initialPosition.from(context.camera.transfo.position)
         this.initCameraController(context, zoomMin, zoomMax)
-        painter.dataset = data.datasetDendrogram
         if (this.lastCameraState) {
             // Restore camera state
             context.camera.setCurrentState(this.lastCameraState)
             this.eventRestingPosition.dispatch(false)
         }
+        return context
+    }
+
+    private initPainter(context: TgdContext, data: MorphologyData) {
+        const painter = new Painter(context, data)
+        this.view.painter = painter
+        painter.synapses = this.synapses
+        this.view.painter = painter
+        return painter
     }
 
     /**
@@ -342,20 +304,22 @@ export class PainterManager {
      * The color of each segment is the ID of this segment. So we must NOT
      * use anti-aliasing, or any shading (other than flat).
      */
-    private initOffscreen(context: TgdContext) {
-        this.offscreen = new OffscreenPainter(context)
-        this.offscreen.structure = this.data?.structure
+    private initOffscreen(context: TgdContext, data: MorphologyData) {
+        const { view } = this
+        view.offscreen = new OffscreenPainter(context)
+        view.offscreen.data = data
         context.inputs.pointer.eventHover.addListener((evt) => {
-            const { painter, data } = this
+            const { data } = this
+            const { painter } = view
             if (!painter || !data) return
 
             const { x, y } = evt.current
-            const item = this.offscreen?.getItemAt(x, y) ?? null
+            const item = view.offscreen?.getItemAt(x, y) ?? null
             if (item !== this.hoverItem.item) {
                 painter.highlight(null)
                 let offset = 0
                 if (item) {
-                    const segments = data.segmentsDendrogram.get(item.index)
+                    const segments = this.segments.get(item.index)
                     painter.highlight(segments)
                     offset = computeSectionOffset(
                         data.structure,
@@ -368,7 +332,7 @@ export class PainterManager {
                     painter.highlight(null)
                 }
                 this.hoverItem = { x, y, offset, item: item ?? null }
-                this.context?.paint()
+                view.paint()
                 this.eventHintVisible.dispatch(true)
             }
         })
@@ -383,16 +347,16 @@ export class PainterManager {
             // Prevent camera movement to be interpreted as a click.
             if (Date.now() - this.lastCameraChangeTimestamp < 300) return
 
-            const { data } = this
-            if (!this.context || !data) return
+            const { data, view } = this
+            if (!view.context || !data) return
 
             const { x, y } = evt
-            const item = this.offscreen?.getItemAt(x, y) ?? null
+            const item = view.offscreen?.getItemAt(x, y) ?? null
             if (item) {
                 const segment = computeSectionOffset(
                     data.structure,
                     item,
-                    this.context.camera,
+                    view.context.camera,
                     x,
                     y
                 )
@@ -433,8 +397,16 @@ export class PainterManager {
         })
     }
 
+    private get segments() {
+        const { data } = this
+        if (!data) return EMPTY_SEGMENTS
+
+        if (this.mode === "3d") return data.segments3D
+        else return data.segmentsDendrogram
+    }
+
     private readonly handlePaint = () => {
-        const { context } = this
+        const { context } = this.view
         if (!context) return
 
         this.lastCameraState = context.camera.getCurrentState()

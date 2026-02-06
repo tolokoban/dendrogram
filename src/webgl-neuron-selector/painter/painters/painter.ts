@@ -1,12 +1,11 @@
 import {
     type TgdContext,
-    TgdDataset,
     TgdLight,
     TgdMaterialDiffuse,
     TgdPainterClear,
     TgdPainterGroup,
-    TgdPainterSegments,
     TgdPainterSegmentsData,
+    TgdPainterSegmentsMorphing,
     TgdPainterState,
     TgdTexture2D,
     TgdVec3,
@@ -14,10 +13,10 @@ import {
     webglPresetDepth,
 } from "@tolokoban/tgd"
 
-import { type StructureItem } from "../structure"
 import { PALETTE } from "./contants"
 import { PainterHover as PainterHighlight } from "./highlight"
 import { PainterSynapses } from "./synapses"
+import { MorphologyData } from "../morphology-data"
 
 export class Painter extends TgdPainterGroup {
     private readonly groupSegments = new TgdPainterGroup()
@@ -28,12 +27,21 @@ export class Painter extends TgdPainterGroup {
 
     private readonly palette: TgdTexture2D
 
-    private _painterSegments: TgdPainterSegments | null = null
+    private _painterSegments: TgdPainterSegmentsMorphing | null = null
+
+    /**
+     * Transition between two views.
+     * For instance, 0.0 for 3D and 1.0 for Dendrogram.
+     */
+    private _mix = 0
 
     private _synapses: Array<{ color: string; data: Float32Array }> | null =
         null
 
-    constructor(private readonly context: TgdContext) {
+    constructor(
+        private readonly context: TgdContext,
+        private readonly data: MorphologyData
+    ) {
         super()
         this.palette = new TgdTexture2D(context)
             .loadBitmap(tgdCanvasCreatePalette(PALETTE))
@@ -52,10 +60,36 @@ export class Painter extends TgdPainterGroup {
                 ],
             })
         )
+        const { dataset3D, datasetDendrogram } = data
+        const painterSegments = new TgdPainterSegmentsMorphing(context, {
+            roundness: 6,
+            minRadius: 0.5,
+            datasetsPairs: [[dataset3D, datasetDendrogram]],
+            material: new TgdMaterialDiffuse({
+                color: this.palette,
+                specularExponent: 1,
+                specularIntensity: 0.25,
+                lockLightsToCamera: true,
+                light: new TgdLight({
+                    direction: new TgdVec3(0, 0, -1),
+                }),
+            }),
+        })
+        painterSegments.mix = this.mix
+        this._painterSegments = painterSegments
+        this.groupSegments.add(painterSegments)
+        context.paint()
     }
 
-    get painterSegments() {
-        return this._painterSegments
+    get mix() {
+        return this._mix
+    }
+
+    set mix(value: number) {
+        this._mix = value
+        if (this._painterSegments) {
+            this._painterSegments.mix = value
+        }
     }
 
     get synapsesEnabled() {
@@ -81,28 +115,6 @@ export class Painter extends TgdPainterGroup {
             groupSynapses.add(new PainterSynapses(context, synapses))
         }
         this.context.paint()
-    }
-
-    set dataset(dataset: TgdDataset) {
-        const { context } = this
-        this.groupSegments.delete()
-        const painterSegments = new TgdPainterSegments(context, {
-            roundness: 6,
-            minRadius: 0.5,
-            dataset,
-            material: new TgdMaterialDiffuse({
-                color: this.palette,
-                specularExponent: 1,
-                specularIntensity: 0.25,
-                lockLightsToCamera: true,
-                light: new TgdLight({
-                    direction: new TgdVec3(0, 0, -1),
-                }),
-            }),
-        })
-        this._painterSegments = painterSegments
-        this.groupSegments.add(painterSegments)
-        context.paint()
     }
 
     highlight(segments: TgdPainterSegmentsData | null | undefined) {

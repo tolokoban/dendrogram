@@ -8,16 +8,17 @@
     ],
     "homepage": "https://tolokoban.github.io/...",
     "dependencies": {
+        "@ant-design/icons": "^6.1.0",
         "@tolokoban/react-state": "^0.7.2",
         "@tolokoban/tgd": "file:../../game/tgd2",
         "@tolokoban/type-guards": "^0.9.0",
+        "antd": "^6.2.3",
         "react": "^19.2.3",
         "react-dom": "^19.2.3"
     },
     "scripts": {
         "clean": "rm -rf src/generated",
-        "generate": "npm run optimize && npm run routes",
-        "optimize": "node scripts/optimize-images/optimize-images.mjs",
+        "generate": "npm run routes",
         "routes": "build-react-routes src/app",
         "start": "webpack serve --mode=development",
         "build": "webpack --mode=production",
@@ -25,7 +26,8 @@
         "deploy": "gh-pages -d build/",
         "lint": "eslint -c .eslintrc.yml 'src/**/*.ts' 'src/**/*.tsx'",
         "format": "prettier --write ./src/",
-        "test": "jest"
+        "test": "jest",
+        "typecheck": "tsc --noEmit"
     },
     "eslintConfig": {
         "extends": "react-app"
