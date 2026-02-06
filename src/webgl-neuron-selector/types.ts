@@ -1,3 +1,5 @@
+import { PainterManager } from "./painter"
+
 export interface MorphologySection {
     index: number
     name: string
@@ -26,3 +28,38 @@ export interface MorphologySection {
 }
 
 export type Morphology = Record<string, MorphologySection>
+
+export interface ElectrodeRecording {
+    section: string
+    offset: number
+    record_currents: boolean
+    origin: "injection" | "recording"
+    color?: string | undefined
+}
+
+export interface ElectrodeInjection {
+    inject_to: string
+}
+
+export interface ElectrodesProps {
+    recordings?: ElectrodeRecording[]
+    onRecordingsChange?(this: void, recordings: ElectrodeRecording[]): void
+    injection?: ElectrodeInjection | undefined
+    onInjectionChange?(
+        this: void,
+        injections: ElectrodeInjection | undefined
+    ): void
+}
+
+export interface WebglNeuronSelectorProps extends ElectrodesProps {
+    morphology: Morphology | null
+    synapses?: Array<{
+        color: string
+        data: Float32Array<ArrayBufferLike>
+    }>
+    disableClick?: boolean
+}
+
+export interface WebglNeuronSelectorContentProps extends WebglNeuronSelectorProps {
+    painterManager: PainterManager
+}

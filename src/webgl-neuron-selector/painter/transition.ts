@@ -23,6 +23,8 @@ export class TransitionManager {
 
     private _mode: ViewMode = "3d"
 
+    private mix = 0
+
     constructor() {
         this.logic = new TgdPainterLogic(this.actualPaint)
     }
@@ -73,19 +75,19 @@ export class TransitionManager {
     private readonly actualPaint = (time: number, delta: number) => {
         const { painter } = this
         if (painter) {
-            const DURATION = 8
-            const PAUSE = 1
-            const span = tgdCalcModulo(time, 0, DURATION + PAUSE)
-            const angle = tgdCalcMapRange(
-                span,
-                0,
-                DURATION,
-                0,
-                2 * Math.PI,
-                true
-            )
-            const mix = tgdCalcMapRange(Math.cos(angle), -1, +1, 0, 1)
-            painter.mix = mix
+            // const DURATION = 8
+            // const PAUSE = 1
+            // const span = tgdCalcModulo(time, 0, DURATION + PAUSE)
+            // const angle = tgdCalcMapRange(
+            //     span,
+            //     0,
+            //     DURATION,
+            //     0,
+            //     2 * Math.PI,
+            //     true
+            // )
+            // const mix = tgdCalcMapRange(Math.cos(angle), -1, +1, 0, 1)
+            painter.mix = this.mix
             painter.paint(time, delta)
         }
     }

@@ -1,4 +1,4 @@
-export function IconStraight() {
+export function IconDendrogramStraight() {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <title>straight</title>
@@ -11,5 +11,5 @@ export function IconStraight() {
                 strokeLinejoin="round"
             />
         </svg>
-    )
+    );
 }

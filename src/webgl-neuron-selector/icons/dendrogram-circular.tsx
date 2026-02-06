@@ -1,4 +1,4 @@
-export function IconCircular() {
+export function IconDendrogramCircular() {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <title>circular</title>
@@ -20,5 +20,5 @@ export function IconCircular() {
                 />
             </g>
         </svg>
-    )
+    );
 }

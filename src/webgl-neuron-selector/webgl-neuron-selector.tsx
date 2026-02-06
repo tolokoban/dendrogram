@@ -4,66 +4,29 @@ import AddRecordingDialog from "./add-recording-dialog";
 import { ButtonResetCamera } from "./button-reset-camera";
 import { HintPanel } from "./hint";
 import LegendOverlay from "./legend-overlay";
-import {
-    type PainterManager,
-    usePainterController,
-    usePainterManager,
-} from "./painter";
+import { usePainterController, useWebglNeuronSelector } from "./painter";
 import styles from "./webgl-neuron-selector.module.css";
 import ZoomSlider from "./zoom-slider";
-import { Morphology } from "./types";
-
-export interface WebglNeuronSelectorProps {
-    morphology: Morphology;
-    sessionId: string;
-    disableElectrodes?: boolean;
-    disableSynapses?: boolean;
-    disableClick?: boolean;
-}
+import {
+    WebglNeuronSelectorContentProps,
+    WebglNeuronSelectorProps,
+} from "./types";
 
 // eslint-disable-next-line react/display-name
 export const WebglNeuronSelector = React.memo(
-    ({
-        morphology,
-        sessionId,
-        disableElectrodes,
-        disableSynapses,
-        disableClick,
-    }: WebglNeuronSelectorProps) => {
-        const painterManager = usePainterManager(morphology);
-        return (
-            <WebglNeuronSelectorContent
-                painterManager={painterManager}
-                sessionId={sessionId}
-                disableElectrodes={disableElectrodes ?? false}
-                disableSynapses={disableSynapses ?? false}
-                disableClick={disableClick ?? false}
-            />
-        );
+    (props: WebglNeuronSelectorProps) => {
+        const painterManager = useWebglNeuronSelector(props.morphology);
+        const extraProps: WebglNeuronSelectorContentProps = {
+            ...props,
+            painterManager,
+        };
+        return <WebglNeuronSelectorContent {...extraProps} />;
     },
 );
 
-type WebglNeuronSelectorContentProps = {
-    painterManager: PainterManager;
-    sessionId: string;
-    disableElectrodes: boolean;
-    disableSynapses: boolean;
-    disableClick: boolean;
-};
-
-function WebglNeuronSelectorContent({
-    painterManager,
-    sessionId,
-    disableElectrodes,
-    disableSynapses,
-    disableClick,
-}: WebglNeuronSelectorContentProps) {
-    usePainterController(
-        painterManager,
-        disableElectrodes,
-        disableSynapses,
-        disableClick,
-    );
+function WebglNeuronSelectorContent(props: WebglNeuronSelectorContentProps) {
+    const { painterManager } = props;
+    usePainterController(props);
 
     return (
         <div className={styles.main}>
@@ -84,16 +47,8 @@ function WebglNeuronSelectorContent({
                 />
                 <ButtonResetCamera painterManager={painterManager} />
             </header>
-            {!disableElectrodes && (
-                <LegendOverlay
-                    painterManager={painterManager}
-                    sessionId={sessionId}
-                />
-            )}
-            <AddRecordingDialog
-                painterManager={painterManager}
-                sessionId={sessionId}
-            />
+            <LegendOverlay {...props} />
+            <AddRecordingDialog {...props} />
         </div>
     );
 }

@@ -12,7 +12,7 @@ import {
     tgdCalcMapRange,
 } from "@tolokoban/tgd"
 import React from "react"
-import type { Morphology } from "../types"
+import type { Morphology, WebglNeuronSelectorContentProps } from "../types"
 import { makeCamera } from "./camera"
 import { computeSectionOffset } from "./math"
 import { OffscreenPainter } from "./offscreen-painter"
@@ -444,7 +444,7 @@ export class PainterManager extends Initializer {
     }
 }
 
-export function usePainterManager(morphology: Morphology | null) {
+export function useWebglNeuronSelector(morphology: Morphology | null) {
     const refPainter = React.useRef<PainterManager | null>(null)
     if (!refPainter.current) {
         refPainter.current = new PainterManager()
@@ -470,13 +470,8 @@ export function usePainterManager(morphology: Morphology | null) {
     return refPainter.current
 }
 
-export function usePainterController(
-    painter: PainterManager,
-    disableElectrodes: boolean,
-    disableSynapses: boolean,
-    disableClick: boolean,
-    eventSynapses?: TgdEvent<{ color: string; data: Float32Array }[]>
-) {
+export function usePainterController(props: WebglNeuronSelectorContentProps) {
+    const { painterManager: painter, synapses, disableClick } = props
     React.useEffect(() => {
         const action = () => {
             painter.eventError.dispatch(
@@ -493,27 +488,7 @@ export function usePainterController(
         }
     }, [disableClick, painter])
 
-    const synapses = useEventValue(eventSynapses, [])
     React.useEffect(() => {
-        painter.showSynapses(synapses)
+        painter.showSynapses(synapses ?? [])
     }, [synapses, painter])
-
-    React.useEffect(() => {
-        painter.disableElectrodes = disableElectrodes
-    }, [disableElectrodes, painter])
-
-    React.useEffect(() => {
-        painter.disableSynapses = disableSynapses
-    }, [disableSynapses, painter])
-}
-
-function useEventValue<T>(event: TgdEvent<T> | undefined, initialValue: T): T {
-    const [value, setValue] = React.useState(initialValue)
-    React.useEffect(() => {
-        if (!event) return
-
-        event.addListener(setValue)
-        return () => event.removeListener(setValue)
-    }, [event])
-    return value
 }

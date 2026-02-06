@@ -25,10 +25,13 @@ export function makeSegmentsDendrogram(
     map: Map<number, TgdPainterSegmentsData>
 ) {
     const width = Math.abs(structure.bbox.max[0] - structure.bbox.min[0])
+    const height = Math.abs(
+        structure.bboxDendrites.max[1] - structure.bboxDendrites.min[1]
+    )
     const segments = new TgdPainterSegmentsData()
     structure.forEach((item) => {
-        const start = computeDendrogramStart(item, width)
-        const end = computeDendrogramEnd(item, width)
+        const start = computeDendrogramStart(item, width, height)
+        const end = computeDendrogramEnd(item, width, height)
         processSegment(item, structure, segments, start, end, map)
     })
     return segments
@@ -60,27 +63,29 @@ function processSegment(
 
 function computeDendrogramStart(
     item: StructureItem,
-    width: number
+    width: number,
+    height: number
 ): ArrayNumber3 {
     if (item.type === StructureItemType.Liaison) {
-        return computeDendrogramEnd(item.parent ?? item, width)
+        return computeDendrogramEnd(item.parent ?? item, width, height)
     }
     const x = item.rank * width
-    const y = item.distanceFromSoma
+    const y = item.distanceFromSoma - height / 2
     const z = 0
     return [x, y, z]
 }
 
 function computeDendrogramEnd(
     item: StructureItem,
-    width: number
+    width: number,
+    height: number
 ): ArrayNumber3 {
     if (item.type === StructureItemType.Liaison) {
         const [child] = item.children
-        return computeDendrogramStart(child ?? item, width)
+        return computeDendrogramStart(child ?? item, width, height)
     }
     const x = item.rank * width
-    const y = item.distanceFromSoma + item.length
+    const y = item.distanceFromSoma + item.length - height / 2
     const z = 0
     return [x, y, z]
 }

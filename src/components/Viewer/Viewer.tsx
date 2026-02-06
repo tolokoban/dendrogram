@@ -4,9 +4,11 @@ import { State } from "@/state";
 import { useEventValue } from "@/util/utils";
 import {
     type PainterManager,
-    usePainterManager,
+    useWebglNeuronSelector,
 } from "@/webgl-neuron-selector/painter";
 import styles from "./Viewer.module.css";
+import { WebglNeuronSelector } from "@/webgl-neuron-selector";
+import { ElectrodeRecording } from "@/webgl-neuron-selector/types";
 
 export interface ViewerProps {
     className?: string;
@@ -14,21 +16,25 @@ export interface ViewerProps {
 
 export default function Viewer({ className }: ViewerProps) {
     const morphology = State.morphology.useValue();
-    const manager = usePainterManager(morphology);
-    const selection = useEventValue(
-        {
-            x: 0,
-            y: 0,
-            item: null,
-            offset: 0,
-        },
-        manager.eventHover,
+    const [recordings, setRecordings] = React.useState<ElectrodeRecording[]>(
+        [],
     );
-    const { item } = selection;
+    // const manager = useWebglNeuronSelector(morphology);
+    // const selection = useEventValue(
+    //     {
+    //         x: 0,
+    //         y: 0,
+    //         item: null,
+    //         offset: 0,
+    //     },
+    //     manager.eventHover,
+    // );
+    // const { item } = selection;
 
     return (
         <div className={join(className, styles.viewer)}>
-            <aside>
+            {
+                /* <aside>
                 <h1>Morphology</h1>
                 {item && (
                     <div className={styles.grid}>
@@ -48,8 +54,13 @@ export default function Viewer({ className }: ViewerProps) {
                         <b>{item.radius}</b>
                     </div>
                 )}
-            </aside>
-            <Canvas manager={manager} />
+            </aside> */
+            }
+            <WebglNeuronSelector
+                morphology={morphology}
+                recordings={recordings}
+                onRecordingsChange={setRecordings}
+            />
         </div>
     );
 }
