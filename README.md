@@ -1,3 +1,3 @@
 # Dendrogram
 
-[Check it here](https://tolokoban/github.io/dendrogram).
+[Check it here](https://tolokoban.github.io/dendrogram).

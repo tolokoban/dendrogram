@@ -1,13 +1,13 @@
 import {
-    TgdAnimation,
-    tgdCalcMix,
-    TgdContext,
+    type TgdAnimation,
+    type TgdContext,
     TgdEvent,
     TgdPainterLogic,
+    tgdCalcMix,
 } from "@tolokoban/tgd"
-import { OffscreenPainter } from "./offscreen-painter"
-import { Painter } from "./painters"
-import { ViewMode } from "../types"
+import type { ViewMode } from "../types"
+import type { OffscreenPainter } from "./offscreen-painter"
+import type { Painter } from "./painters"
 
 /**
  * Manage the transition between views.
@@ -29,7 +29,7 @@ export class TransitionManager {
 
     private ongoingAnimations: TgdAnimation[] = []
 
-    constructor(public readonly duration = 2) {
+    constructor(public readonly duration = 1) {
         this.logic = new TgdPainterLogic(this.actualPaint)
     }
 
