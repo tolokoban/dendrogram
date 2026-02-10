@@ -1,14 +1,8 @@
-import { TgdEvent } from "@tolokoban/tgd";
 import React from "react";
 import { State } from "@/state";
-import { useEventValue } from "@/util/utils";
-import {
-    type PainterManager,
-    useWebglNeuronSelector,
-} from "@/webgl-neuron-selector/painter";
-import styles from "./Viewer.module.css";
 import { WebglNeuronSelector } from "@/webgl-neuron-selector";
-import { ElectrodeRecording } from "@/webgl-neuron-selector/types";
+import type { ElectrodeRecording } from "@/webgl-neuron-selector/types";
+import styles from "./Viewer.module.css";
 
 export interface ViewerProps {
     className?: string;
@@ -16,66 +10,20 @@ export interface ViewerProps {
 
 export default function Viewer({ className }: ViewerProps) {
     const morphology = State.morphology.useValue();
+    const morphologies = morphology ? [morphology] : [];
     const [recordings, setRecordings] = React.useState<ElectrodeRecording[]>(
         [],
     );
-    // const manager = useWebglNeuronSelector(morphology);
-    // const selection = useEventValue(
-    //     {
-    //         x: 0,
-    //         y: 0,
-    //         item: null,
-    //         offset: 0,
-    //     },
-    //     manager.eventHover,
-    // );
-    // const { item } = selection;
 
     return (
         <div className={join(className, styles.viewer)}>
-            {
-                /* <aside>
-                <h1>Morphology</h1>
-                {item && (
-                    <div className={styles.grid}>
-                        <div>Name:</div>
-                        <b>{item.name}</b>
-                        <div>Section:</div>
-                        <b>{item.sectionName}</b>
-                        <div>Segment:</div>
-                        <b>{item.segmentIndex}</b>
-                        <div>Leaves:</div>
-                        <b>{item.leavesCount}</b>
-                        <div>Max length:</div>
-                        <b>{item.maxLength}</b>
-                        <div>Children:</div>
-                        <b>{item.children.length}</b>
-                        <div>Radius:</div>
-                        <b>{item.radius}</b>
-                    </div>
-                )}
-            </aside> */
-            }
             <WebglNeuronSelector
-                morphology={morphology}
+                morphologies={morphologies}
                 recordings={recordings}
                 onRecordingsChange={setRecordings}
             />
         </div>
     );
-}
-
-const Canvas = React.memo(CanvasContent);
-
-function CanvasContent({ manager }: { manager: PainterManager }) {
-    const mountCanvas = (canvas: HTMLCanvasElement | null) => {
-        manager.canvas = canvas;
-        return () => {
-            manager.canvas = null;
-        };
-    };
-
-    return <canvas ref={mountCanvas}></canvas>;
 }
 
 function join(...classes: unknown[]): string {

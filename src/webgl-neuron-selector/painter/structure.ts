@@ -34,7 +34,8 @@ export interface StructureItem {
     segmentsCount: number
     start: ArrayNumber3
     end: ArrayNumber3
-    radius: number
+    radiusStart: number
+    radiusEnd: number
     type: StructureItemType
     length: number
     distanceFromSoma: number
@@ -115,7 +116,8 @@ export class Structure {
                     children: [],
                     start,
                     end,
-                    radius: section.diam[segmentIndex] / 2,
+                    radiusStart: section.diam[segmentIndex] / 2,
+                    radiusEnd: section.diam[segmentIndex] / 2,
                     index: this.items.length,
                     name: `${sectionName}[${segmentIndex}]`,
                     sectionName,
@@ -132,19 +134,19 @@ export class Structure {
                 this.segments.set(item.name, item)
                 this.addToSection(item)
                 this.items.push(item)
-                bbox.min = computeMin(bbox.min, start, item.radius)
-                bbox.max = computeMax(bbox.max, start, item.radius)
-                bbox.min = computeMin(bbox.min, end, item.radius)
-                bbox.max = computeMax(bbox.max, end, item.radius)
+                bbox.min = computeMin(bbox.min, start, item.radiusStart)
+                bbox.max = computeMax(bbox.max, start, item.radiusStart)
+                bbox.min = computeMin(bbox.min, end, item.radiusEnd)
+                bbox.max = computeMax(bbox.max, end, item.radiusEnd)
                 if (isSoma) {
                     somaCounts++
                     somaCenter.add(start)
                     somaCounts++
                     somaCenter.add(end)
-                    bboxSoma.min = computeMin(bboxSoma.min, start, item.radius)
-                    bboxSoma.max = computeMax(bboxSoma.max, start, item.radius)
-                    bboxSoma.min = computeMin(bboxSoma.min, end, item.radius)
-                    bboxSoma.max = computeMax(bboxSoma.max, end, item.radius)
+                    bboxSoma.min = computeMin(bboxSoma.min, start, item.radiusStart)
+                    bboxSoma.max = computeMax(bboxSoma.max, start, item.radiusStart)
+                    bboxSoma.min = computeMin(bboxSoma.min, end, item.radiusEnd)
+                    bboxSoma.max = computeMax(bboxSoma.max, end, item.radiusEnd)
                     isBBoxSomaEmpty = false
                 } else {
                     if (
@@ -158,22 +160,22 @@ export class Structure {
                         bboxDendrites.min = computeMin(
                             bboxDendrites.min,
                             start,
-                            item.radius
+                            item.radiusStart
                         )
                         bboxDendrites.max = computeMax(
                             bboxDendrites.max,
                             start,
-                            item.radius
+                            item.radiusStart
                         )
                         bboxDendrites.min = computeMin(
                             bboxDendrites.min,
                             end,
-                            item.radius
+                            item.radiusEnd
                         )
                         bboxDendrites.max = computeMax(
                             bboxDendrites.max,
                             end,
-                            item.radius
+                            item.radiusEnd
                         )
                         isBBoxDendritesEmpty = false
                     }

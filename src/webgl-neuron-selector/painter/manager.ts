@@ -2,30 +2,29 @@
 /* eslint-disable no-param-reassign */
 
 import {
-    ArrayNumber3,
     type TgdCameraState,
     TgdContext,
     TgdControllerCameraOrbit,
     TgdEvent,
     TgdMat4,
-    TgdPainterSegmentsData,
+    type TgdPainterSegmentsData,
     TgdVec3,
     tgdCalcMapRange,
 } from "@tolokoban/tgd"
 import React from "react"
 import type {
-    Morphology,
     ViewMode,
     WebglNeuronSelectorContentProps,
+    WebglNeuronSelectorProps,
 } from "../types"
 import { makeCamera } from "./camera"
+import { Initializer } from "./initializer"
 import { computeSectionOffset } from "./math"
+import type { MorphologyData } from "./morphology-data"
 import { OffscreenPainter } from "./offscreen-painter"
 import { Painter } from "./painters"
-import { type StructureItem } from "./structure"
-import { MorphologyData } from "./morphology-data"
+import type { StructureItem } from "./structure"
 import { TransitionManager } from "./transition"
-import { Initializer } from "./initializer"
 
 interface SelectedItem {
     x: number
@@ -312,6 +311,9 @@ export class PainterManager extends Initializer {
             context.camera.setCurrentState(this.lastCameraState)
             this.eventRestingPosition.dispatch(false)
         }
+        context.inputs.pointer.eventTapMultiple.addListener(() => {
+            console.log(context.camera.toCode())
+        })
         return context
     }
 
@@ -468,7 +470,10 @@ export class PainterManager extends Initializer {
     }
 }
 
-export function useWebglNeuronSelector(morphology: Morphology | null) {
+export function useWebglNeuronSelector({
+    morphologies,
+}: WebglNeuronSelectorProps) {
+    const [morphology] = morphologies
     const refPainter = React.useRef<PainterManager | null>(null)
     if (!refPainter.current) {
         refPainter.current = new PainterManager()

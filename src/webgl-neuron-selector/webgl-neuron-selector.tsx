@@ -1,24 +1,25 @@
 /* eslint-disable no-param-reassign */
+
+import { FullscreenOutlined } from "@ant-design/icons";
+import { tgdFullscreenToggle } from "@tolokoban/tgd";
 import React from "react";
 import AddRecordingDialog from "./components/add-recording-dialog";
 import { ButtonResetCamera } from "./components/button-reset-camera";
 import { HintPanel } from "./components/hint";
 import LegendOverlay from "./components/legend-overlay";
+import ModeSelector from "./components/ModeSelector";
+import ZoomSlider from "./components/zoom-slider";
 import {
-    PainterManager,
+    type PainterManager,
     usePainterController,
     useWebglNeuronSelector,
 } from "./painter";
+import type { WebglNeuronSelectorProps } from "./types";
 import styles from "./webgl-neuron-selector.module.css";
-import ZoomSlider from "./components/zoom-slider";
-import { WebglNeuronSelectorProps } from "./types";
-import ModeSelector from "./components/ModeSelector";
-import { FullscreenOutlined } from "@ant-design/icons";
-import { tgdFullscreenToggle } from "@tolokoban/tgd";
 
 // eslint-disable-next-line react/display-name
 export function WebglNeuronSelector(props: WebglNeuronSelectorProps) {
-    const painterManager = useWebglNeuronSelector(props.morphology);
+    const painterManager = useWebglNeuronSelector(props);
     const extraProps = { ...props, painterManager };
     usePainterController(extraProps);
     const ref = React.useRef<HTMLDivElement | null>(null);
@@ -40,10 +41,7 @@ export function WebglNeuronSelector(props: WebglNeuronSelectorProps) {
                     <ButtonResetCamera painterManager={painterManager} />
                 </div>
                 <div className={styles.flex}>
-                    <button
-                        type="button"
-                        onClick={handleFullscreen}
-                    >
+                    <button type="button" onClick={handleFullscreen}>
                         <FullscreenOutlined />
                     </button>
                 </div>
